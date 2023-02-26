@@ -1,0 +1,21 @@
+{
+  "name": "playroom",
+  "version": "1.0.0",
+  "description": "",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "scripts": {
+    "start": "parcel src/index.html --open",
+    "build": "parcel build src/index.html --public-url ./"
+  },
+  "dependencies": {
+    "@parcel/transformer-glsl": "^2.8.2",
+    "cannon-es": "^0.20.0",
+    "cannon-es-debugger": "^1.0.0",
+    "dat.gui": "^0.7.9",
+    "three": "^0.150.0"
+  },
+  "devDependencies": {
+    "parcel": "^2.7.0"
+  },
+  "keywords": []
+}

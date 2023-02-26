@@ -87,7 +87,7 @@ let app = {
     // objects
     const planeGeo = new THREE.PlaneGeometry( 100.1, 100.1 );
     
-    // Create a sphere body
+    // Create a sphere
     const radius = 15 // m
     const spherePhysMat = new CANNON.Material()
     this.spherePhys = new CANNON.Body({
@@ -105,11 +105,30 @@ let app = {
     this.sphere.name = 'sphere'
     scene.add( this.sphere );
 
-    // create a list of threejs objects
-    const objList = [this.sphere]
+    // Create a icosahedron body
+    const icosahedronPhysMat = new CANNON.Material()
+    this.icosahedronPhys = new CANNON.Body({
+      mass: 3, // kg
+      shape: new CANNON.Sphere(10),
+      material: icosahedronPhysMat
+    })
+    this.icosahedronPhys.position.set(20, 10, -20) // m
+    this.world.addBody(this.icosahedronPhys)
+
+    geometry = new THREE.IcosahedronGeometry( 10, 1 )
+    material = new THREE.MeshPhongMaterial( { color: 0x1199ff, emissive: 0x888888, flatShading: true } );
+    this.icosahedron = new THREE.Mesh( geometry, material );
+    this.icosahedron.position.set(20, 10, -20)
+    this.icosahedron.name = 'icosahedron'
+    scene.add( this.icosahedron );
+    
+    // create a list of threejs objects and mats
+    this.objList = [this.sphere, this.icosahedron]
+    const objMats = [spherePhysMat, icosahedronPhysMat]
     // map threejs objects to physical objects
-    const objMap = {
-      'sphere': this.spherePhys
+    this.objMap = {
+      'sphere': this.spherePhys,
+      'icosahedron': this.icosahedronPhys
     }
 
     // physical walls, note that you cannot create intercepting static planes
@@ -168,6 +187,8 @@ let app = {
     planeLeftPhys.position.set(-100, 50, 0)
     this.world.addBody(planeLeftPhys)
 
+    const planeMats = [planeTopPhysMat, planeBottomPhysMat, planeFrontPhysMat, planeBackPhysMat, planeRightPhysMat, planeLeftPhysMat]
+
     // walls
 
     const planeTop = new THREE.Mesh( planeGeo, new THREE.MeshPhongMaterial( { color: 0xffffff } ) );
@@ -205,27 +226,22 @@ let app = {
       mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
       console.log(mouse)
       raycaster.setFromCamera( mouse, camera );
-      const intersections = raycaster.intersectObjects( objList );
+      const intersections = raycaster.intersectObjects( this.objList );
       for (let i = 0; i < intersections.length; i++) {
-        let physObj = objMap[intersections[i].object.name]
+        console.log(intersections[i].object.name)
+        let physObj = this.objMap[intersections[i].object.name]
 
-        const impulse = new CANNON.Vec3(500 * (Math.random() * 2 - 1), 500 * (Math.random() * 2 - 1), 100 * (Math.random() * 2 - 1))
+        const impulse = new CANNON.Vec3(500 * (Math.random() * 2 - 1), 500 * (Math.random() * 2 - 1), 500 * (Math.random() * 2 - 1))
         physObj.applyImpulse(impulse)
       }
     })
 
     // Bounce behaviors
-    const TopBounce = new CANNON.ContactMaterial(planeTopPhysMat, spherePhysMat, { friction: 0.1, restitution: 0.6 })
-    const BottomBounce = new CANNON.ContactMaterial(planeBottomPhysMat, spherePhysMat, { friction: 0.1, restitution: 0.6 })
-    const FrontBounce = new CANNON.ContactMaterial(planeFrontPhysMat, spherePhysMat, { friction: 0.1, restitution: 0.6 })
-    const BackBounce = new CANNON.ContactMaterial(planeBackPhysMat, spherePhysMat, { friction: 0.1, restitution: 0.6 })
-    const RightBounce = new CANNON.ContactMaterial(planeRightPhysMat, spherePhysMat, { friction: 0.1, restitution: 0.6 })
-    const LeftBounce = new CANNON.ContactMaterial(planeLeftPhysMat, spherePhysMat, { friction: 0.1, restitution: 0.6 })
-    const bouncers = [TopBounce, BottomBounce, FrontBounce, BackBounce, RightBounce, LeftBounce]
-    for (bn of bouncers) {
-      this.world.addContactMaterial(bn)
+    for (planeMat of planeMats) {
+      for (objMat of objMats) {
+        this.world.addContactMaterial(new CANNON.ContactMaterial(planeMat, objMat, { friction: 0.1, restitution: 0.6 }))
+      }
     }
-    
 
     // Reflectors
 
@@ -290,8 +306,11 @@ let app = {
 
     this.world.fixedStep()
 
-    this.sphere.position.copy(this.spherePhys.position)
-    this.sphere.quaternion.copy(this.spherePhys.quaternion)
+    // update objects positions from physical calculations
+    for (obj of this.objList) {
+      obj.position.copy(this.objMap[obj.name].position)
+      obj.quaternion.copy(this.objMap[obj.name].quaternion)
+    }
   }
 }
 

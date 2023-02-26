@@ -224,11 +224,9 @@ let app = {
       let mouse = new THREE.Vector2()
       mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
       mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
-      console.log(mouse)
       raycaster.setFromCamera( mouse, camera );
       const intersections = raycaster.intersectObjects( this.objList );
       for (let i = 0; i < intersections.length; i++) {
-        console.log(intersections[i].object.name)
         let physObj = this.objMap[intersections[i].object.name]
 
         const impulse = new CANNON.Vec3(500 * (Math.random() * 2 - 1), 500 * (Math.random() * 2 - 1), 500 * (Math.random() * 2 - 1))

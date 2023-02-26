@@ -1,6 +1,6 @@
-## Example Raycasting
+## Physics Box with Raycasting interactions
 
-A Example Raycasting, from this threejs example: https://github.com/mrdoob/three.js/blob/master/examples/webgl_instancing_raycast.html
+This demo combines raycasting technique and physics engine using cannon-es
 
 ## How to run locally
 

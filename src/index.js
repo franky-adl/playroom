@@ -235,8 +235,8 @@ let app = {
     })
 
     // Bounce behaviors
-    for (planeMat of planeMats) {
-      for (objMat of objMats) {
+    for (const planeMat of planeMats) {
+      for (const objMat of objMats) {
         this.world.addContactMaterial(new CANNON.ContactMaterial(planeMat, objMat, { friction: 0.1, restitution: 0.6 }))
       }
     }
@@ -305,7 +305,7 @@ let app = {
     this.world.fixedStep()
 
     // update objects positions from physical calculations
-    for (obj of this.objList) {
+    for (const obj of this.objList) {
       obj.position.copy(this.objMap[obj.name].position)
       obj.quaternion.copy(this.objMap[obj.name].quaternion)
     }
